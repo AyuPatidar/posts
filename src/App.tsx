@@ -1,20 +1,29 @@
 import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import LandingPage from "./components/LandingPage";
 import CardPage from "./components/CardPage";
+import FunctionalLandingPage from "./components/FunctionalLandingPage";
+import FunctionalCardPage from "./components/FunctionalCardPage";
 
 function App() {
   return (
     <Routes>
-      <Route
+      {/* <Route
         path="/"
         element={<LandingPage />}
       />
       <Route
         path="/:title"
         element={<CardPage />}
+      /> */}
+      <Route
+        path="/"
+        element={<FunctionalLandingPage />}
+      />
+      <Route
+        path="/:title"
+        element={<FunctionalCardPage />}
       />
     </Routes>
   );
