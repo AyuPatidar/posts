@@ -9,22 +9,22 @@ import FunctionalCardPage from "./components/FunctionalCardPage";
 function App() {
   return (
     <Routes>
-      <Route
+      {/* <Route
         path="/"
         element={<LandingPage />}
       />
       <Route
         path="/:title"
         element={<CardPage />}
-      />
-      {/* <Route
+      /> */}
+      <Route
         path="/"
         element={<FunctionalLandingPage />}
       />
       <Route
         path="/:title"
         element={<FunctionalCardPage />}
-      /> */}
+      />
     </Routes>
   );
 }
