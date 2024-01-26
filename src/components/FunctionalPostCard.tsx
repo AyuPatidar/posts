@@ -1,14 +1,14 @@
 import { Card, CardActionArea, CardContent, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
-
+import "../App.css";
 import React from "react";
 
 interface IPROPS {
   title: string;
   author: string;
   authorURL: string;
-  created_at: Date;
-  _tags: string[];
+  created_at: string;
+  _tags: string[] | null | undefined;
   handleClick: Function;
 }
 
@@ -21,38 +21,47 @@ const FunctionalPostCard: React.FC<IPROPS> = ({
   handleClick,
 }) => {
   return (
-    <Card sx={{ width: "75vw", minWidth: "100%", backgroundColor: "black" }}>
-      <CardContent sx={{ color: "white" }}>
+    <Card
+      sx={{
+        width: "75vw",
+        minWidth: "100%",
+        borderRadius: 5,
+        backgroundColor: "rgba(0, 0, 0, 0.05)",
+        textWrap: "pretty",
+      }}
+    >
+      <CardContent>
         <CardActionArea onClick={() => handleClick(title)}>
           <Typography
             variant="h5"
-            color="#80d8ff"
+            fontWeight={600}
             gutterBottom
           >
             {title}
           </Typography>
           <Typography
-            sx={{ fontSize: 18 }}
-            color="#80d8ff"
+            variant="h6"
             component="div"
           >
             {author}
           </Typography>
           <Typography
-            sx={{ mb: 1.5, fontSize: 14 }}
-            color="whitesmoke"
+            sx={{ mb: 1.5 }}
+            variant="body1"
           >
-            {created_at.toString().substring(0, 10)}
+            {created_at.substring(0, 10)}
           </Typography>
-          <Typography variant="body1">Tags:</Typography>{" "}
-          {_tags.map((tag, index) => (
-            <span key={index}>
-              {tag}
-              <br />
-            </span>
-          ))}
+          <Typography variant="body1">
+            {_tags && <>Tags: </>}
+            {_tags?.map((tag, index) => (
+              <span key={index}>
+                {index !== 0 && ", "}
+                {tag}
+              </span>
+            ))}
+          </Typography>
         </CardActionArea>
-        <Typography variant="body2">
+        <Typography variant="body1">
           Author Url:{" "}
           <Link
             to={authorURL}
@@ -60,7 +69,6 @@ const FunctionalPostCard: React.FC<IPROPS> = ({
             style={{
               textDecoration: "none",
               fontSize: 14,
-              color: "#80d8ff",
             }}
           >
             {authorURL}

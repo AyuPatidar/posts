@@ -24,7 +24,7 @@ interface ISTATE {
   inputValue: string;
   posts: Post[];
   searchedPosts: Post[];
-  intervalId: number;
+  timeoutId: number | NodeJS.Timeout | undefined;
 }
 
 class LandingPage extends React.Component<IPROPS, ISTATE> {
@@ -38,7 +38,7 @@ class LandingPage extends React.Component<IPROPS, ISTATE> {
       inputValue: "",
       posts: [] as Post[],
       searchedPosts: [] as Post[],
-      intervalId: 0,
+      timeoutId: undefined,
     };
   }
 
@@ -49,14 +49,11 @@ class LandingPage extends React.Component<IPROPS, ISTATE> {
         `https://hn.algolia.com/api/v1/search_by_date?tags=story&page=${this.state.pageNo}`
       );
       const data = await res.json();
-      if (data.hits.length > 0) {
+      if (data.hits.length > 0)
         this.setState((prevState) => ({
           posts: [...prevState.posts, ...data.hits] as Post[],
-          pageNo: prevState.pageNo + 1,
         }));
-      } else {
-        this.setState({ hasMore: false });
-      }
+      else this.setState({ hasMore: false });
     } catch (error) {
       console.log((error as Error).message);
     }
@@ -64,46 +61,50 @@ class LandingPage extends React.Component<IPROPS, ISTATE> {
   };
 
   componentDidMount() {
-    this.setState({
-      intervalId: window.setInterval(() => {
-        console.log("interval");
-        this.setState({ isFetching: true }, () => {
-          if (this.state.hasMore) this.fetchPosts();
-        });
-      }, 10000),
-    });
-
-    this.setState({ isFetching: true }, () => {
-      this.fetchPosts();
-    });
-
+    if (this.state.pageNo === 0) this.setState({ isFetching: true });
     window.addEventListener("scroll", this.handleScroll);
   }
 
   componentDidUpdate(prevProps: Readonly<IPROPS>, prevState: Readonly<ISTATE>) {
     if (this.state !== prevState) {
-    }
-  }
-
-  handleScroll = () => {
-    this.setState(
-      {
-        isBottom:
-          Math.ceil(window.innerHeight + window.scrollY) >=
-          document.documentElement.scrollHeight,
-      },
-      () => {
+      // pageNo change
+      if (prevState.pageNo !== this.state.pageNo) {
+        if (this.state.pageNo === 0) this.setState({ isFetching: true });
+        if (this.state.timeoutId) window.clearTimeout(this.state.timeoutId);
+        this.setState({
+          timeoutId: window.setTimeout(() => {
+            console.log("interval");
+            if (this.state.hasMore) this.setState({ isFetching: true });
+          }, 10000),
+        });
+      }
+      // isBottom change
+      if (this.state.isBottom !== prevState.isBottom) {
+        if (this.state.isBottom) this.setState({ pageNo: prevState.pageNo });
         if (
           this.state.isBottom &&
           this.state.isFetching === false &&
           this.state.hasMore
-        ) {
-          this.setState({ isFetching: true }, () => {
-            this.fetchPosts();
-          });
-        }
+        )
+          this.setState({ isFetching: true });
       }
-    );
+      // isFetching change
+      if (
+        this.state.isFetching !== prevState.isFetching &&
+        this.state.isFetching
+      ) {
+        this.fetchPosts();
+        this.setState({ pageNo: prevState.pageNo + 1 });
+      }
+    }
+  }
+
+  handleScroll = () => {
+    this.setState({
+      isBottom:
+        Math.ceil(window.innerHeight + window.scrollY) >=
+        document.documentElement.scrollHeight,
+    });
   };
 
   handleChange = (
@@ -122,14 +123,12 @@ class LandingPage extends React.Component<IPROPS, ISTATE> {
 
   componentWillUnmount() {
     window.removeEventListener("scroll", this.handleScroll);
-    window.clearInterval(this.state.intervalId);
   }
 
   handleCardClick = (passedTitle: string) => {
     const posts = this.state.posts.filter((post) =>
       post.title.includes(passedTitle)
     );
-    window.clearInterval(this.state.intervalId);
     this.props.navigate(`/${passedTitle}`, {
       state: {
         post: posts[0],
@@ -138,26 +137,30 @@ class LandingPage extends React.Component<IPROPS, ISTATE> {
   };
 
   render() {
+    const { inputValue, posts, searchedPosts } = this.state;
     return (
       <Box className="box">
-        <FormControl
-          sx={{ mx: 1, mt: 3, mb: 1, width: "50%" }}
-          variant="outlined"
-        >
-          <InputLabel htmlFor="title-author">
-            Enter title or author's name
-          </InputLabel>
-          <OutlinedInput
-            id="title-author"
-            type="search"
-            label="Enter title or author's name"
-            value={this.state.inputValue}
-            onChange={(e) => this.handleChange(e)}
-          />
-        </FormControl>
+        <Box className="form-container">
+          <FormControl
+            sx={{ mx: 1, mt: 3, mb: 1, width: "50%" }}
+            variant="outlined"
+            color="info"
+          >
+            <InputLabel htmlFor="title-author">
+              Enter title or author's name
+            </InputLabel>
+            <OutlinedInput
+              id="title-author"
+              type="search"
+              label="Enter title or author's name"
+              value={inputValue}
+              onChange={(e) => this.handleChange(e)}
+            />
+          </FormControl>
+        </Box>
         <List>
-          {this.state.inputValue === "" ? (
-            this.state.posts.map((post, index) => (
+          {inputValue === "" ? (
+            posts.map((post, index) => (
               <ListItem key={index}>
                 <PostCard
                   title={post.title}
@@ -171,7 +174,7 @@ class LandingPage extends React.Component<IPROPS, ISTATE> {
             ))
           ) : (
             <>
-              {this.state.searchedPosts.map((post, index) => (
+              {searchedPosts.map((post, index) => (
                 <ListItem key={index}>
                   <PostCard
                     title={post.title}

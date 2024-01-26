@@ -8,9 +8,9 @@ import {
   OutlinedInput,
 } from "@mui/material";
 import "../App.css";
-import PostCard from "./PostCard";
 import { Post } from "../models/post";
 import { useNavigate } from "react-router-dom";
+import FunctionalPostCard from "./FunctionalPostCard";
 
 const FunctionalLandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -104,26 +104,29 @@ const FunctionalLandingPage: React.FC = () => {
 
   return (
     <Box className="box">
-      <FormControl
-        sx={{ mx: 1, mt: 3, mb: 1, width: "50%" }}
-        variant="outlined"
-      >
-        <InputLabel htmlFor="title-author">
-          Enter title or author's name
-        </InputLabel>
-        <OutlinedInput
-          id="title-author"
-          type="search"
-          label="Enter title or author's name"
-          value={inputValue}
-          onChange={(e) => handleChange(e)}
-        />
-      </FormControl>
+      <Box className="form-container">
+        <FormControl
+          sx={{ mx: 1, mt: 3, mb: 1, width: "50%" }}
+          variant="outlined"
+          color="info"
+        >
+          <InputLabel htmlFor="title-author">
+            Enter title or author's name
+          </InputLabel>
+          <OutlinedInput
+            id="title-author"
+            type="search"
+            label="Enter title or author's name"
+            value={inputValue}
+            onChange={(e) => handleChange(e)}
+          />
+        </FormControl>
+      </Box>
       <List>
         {inputValue === "" ? (
           posts.map((post, index) => (
             <ListItem key={index}>
-              <PostCard
+              <FunctionalPostCard
                 title={post.title}
                 author={post.author}
                 _tags={post._tags}
@@ -137,7 +140,7 @@ const FunctionalLandingPage: React.FC = () => {
           <>
             {searchedPosts.map((post, index) => (
               <ListItem key={index}>
-                <PostCard
+                <FunctionalPostCard
                   title={post.title}
                   author={post.author}
                   _tags={post._tags}
