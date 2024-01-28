@@ -52,11 +52,11 @@ class PostCard extends React.Component<IPROPS> {
               {this.props.created_at.substring(0, 10)}
             </Typography>
             <Typography variant="body1">
-              {this.props._tags && <>Tags:</>}
+              {this.props._tags && <>Tags: </>}
               {this.props._tags?.map((tag, index) => (
                 <span key={index}>
+                  {index !== 0 && ", "}
                   {tag}
-                  <br />
                 </span>
               ))}
             </Typography>
